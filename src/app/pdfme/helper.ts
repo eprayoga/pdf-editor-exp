@@ -26,6 +26,7 @@ import {
 } from "@pdfme/schemas";
 import plugins from "./plugins";
 
+// Ubah dari kebab-case ke PascalCase
 export function fromKebabCase(str: string): string {
   return str
     .split("-")
@@ -33,21 +34,48 @@ export function fromKebabCase(str: string): string {
     .join(" ");
 }
 
-export const getFontsData = (): Font => ({
-  ...getDefaultFont(),
-  NotoSerifJP: {
-    fallback: false,
-    data: "https://fonts.gstatic.com/s/notoserifjp/v30/xn71YHs72GKoTvER4Gn3b5eMRtWGkp6o7MjQ2bwxOubAILO5wBCU.ttf",
-  },
-  NotoSansJP: {
-    fallback: false,
-    data: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf",
-  },
-  "PinyonScript-Regular": {
-    fallback: false,
-    data: "https://fonts.gstatic.com/s/pinyonscript/v22/6xKpdSJbL9-e9LuoeQiDRQR8aOLQO4bhiDY.ttf",
-  },
-});
+// Fungsi untuk membaca file ttf sebagai ArrayBuffer
+export const loadFontAsArrayBuffer = async (
+  url: string
+): Promise<ArrayBuffer> => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load font from ${url}`);
+  return await res.arrayBuffer();
+};
+
+// Load font termasuk Tinos lokal sebagai ArrayBuffer
+export const getFontsData = async (): Promise<Font> => {
+  const tinosArrayBuffer = await loadFontAsArrayBuffer(
+    "/assets/fonts/tinos/Tinos-Regular.ttf"
+  );
+  const tinosBoldArrayBuffer = await loadFontAsArrayBuffer(
+    "/assets/fonts/tinos/Tinos-Bold.ttf"
+  );
+
+  return {
+    ...getDefaultFont(),
+    NotoSerifJP: {
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/notoserifjp/v30/xn71YHs72GKoTvER4Gn3b5eMRtWGkp6o7MjQ2bwxOubAILO5wBCU.ttf",
+    },
+    NotoSansJP: {
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf",
+    },
+    "PinyonScript-Regular": {
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/pinyonscript/v22/6xKpdSJbL9-e9LuoeQiDRQR8aOLQO4bhiDY.ttf",
+    },
+    "Tinos-Regular": {
+      fallback: false,
+      data: tinosArrayBuffer,
+    },
+    "Tinos-Bold": {
+      fallback: false,
+      data: tinosBoldArrayBuffer,
+    },
+  };
+};
 
 export const readFile = (
   file: File | null,
@@ -105,9 +133,7 @@ export const handleLoadTemplate = (
         currentRef.updateTemplate(t);
       })
       .catch((e) => {
-        alert(`Invalid template file.
---------------------------
-${e}`);
+        alert(`Invalid template file.\n--------------------------\n${e}`);
       });
   }
 };
@@ -130,16 +156,8 @@ export const getPlugins = () => {
     Select: select,
     Checkbox: checkbox,
     RadioGroup: radioGroup,
-    // JAPANPOST: barcodes.japanpost,
     EAN13: barcodes.ean13,
-    // EAN8: barcodes.ean8,
-    // Code39: barcodes.code39,
     Code128: barcodes.code128,
-    // NW7: barcodes.nw7,
-    // ITF14: barcodes.itf14,
-    // UPCA: barcodes.upca,
-    // UPCE: barcodes.upce,
-    // GS1DataMatrix: barcodes.gs1datamatrix,
   };
 };
 
@@ -167,7 +185,7 @@ export const generatePDF = async (
     typeof (currentRef as Viewer | Form).getInputs === "function"
       ? (currentRef as Viewer | Form).getInputs()
       : getInputFromTemplate(template);
-  const font = getFontsData();
+  const font = await getFontsData(); // Tunggu font dimuat
 
   try {
     const pdf = await generate({

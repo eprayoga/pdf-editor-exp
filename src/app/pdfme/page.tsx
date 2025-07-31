@@ -60,7 +60,7 @@ function DesignerApp() {
         domContainer: designerRef.current,
         template,
         options: {
-          font: getFontsData(),
+          font: await getFontsData(),
           lang: "en",
           labels: {
             "signature.clear": "🗑️",
