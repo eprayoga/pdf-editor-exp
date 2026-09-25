@@ -48,7 +48,7 @@ export function PdfPage({ document: pdfDocument, pageIndex, previewSize, onRende
         offscreenContext.fillStyle = "#ffffff";
         offscreenContext.fillRect(0, 0, offscreen.width, offscreen.height);
 
-        task = page.render({ canvasContext: offscreenContext, viewport });
+        task = page.render({ canvas: offscreen, canvasContext: offscreenContext, viewport });
         await task.promise;
         if (cancelled) return;
 

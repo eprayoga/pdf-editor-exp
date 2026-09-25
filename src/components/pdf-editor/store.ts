@@ -123,7 +123,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setDocument: ({ file, bytes, renderDocument, pageCount, pageSizes }) => {
     const previous = get().renderDocument;
     if (previous && previous !== renderDocument) {
-      previous.destroy().catch(() => undefined);
+      previous.loadingTask.destroy().catch(() => undefined);
     }
     set({
       ...initialEditor,
@@ -140,7 +140,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   closeDocument: () => {
     const previous = get().renderDocument;
-    if (previous) previous.destroy().catch(() => undefined);
+    if (previous) previous.loadingTask.destroy().catch(() => undefined);
     set({ ...initialPdf, ...initialEditor, currentPage: 0, zoom: 1 });
   },
 
