@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ElementType } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -6,7 +7,6 @@ import {
   GithubLogo,
   Layout,
   Signature,
-  type Icon,
 } from "@phosphor-icons/react/dist/ssr";
 
 const GITHUB_URL = "https://github.com/eprayoga/pdf-editor-exp";
@@ -15,7 +15,7 @@ type Experiment = {
   href: string;
   title: string;
   description: string;
-  icon: Icon;
+  icon: ElementType;
   tags: string[];
 };
 
@@ -67,21 +67,30 @@ export default function Home() {
           <span className="inline-flex items-center rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
             Experiments
           </span>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">PDF Experimental</h1>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+            PDF Experimental
+          </h1>
           <p className="mt-2 text-base text-muted-foreground">
-            by <span className="font-medium text-foreground">Endang Prayoga</span>
+            by{" "}
+            <span className="font-medium text-foreground">Endang Prayoga</span>
           </p>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            A small playground for exploring different approaches to creating and editing PDF documents in the browser.
+            A small playground for exploring different approaches to creating
+            and editing PDF documents in the browser.
           </p>
         </section>
 
         <section aria-labelledby="experiments-heading" className="mt-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 id="experiments-heading" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h2
+              id="experiments-heading"
+              className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               Experiments
             </h2>
-            <span className="text-xs tabular-nums text-muted-foreground">{EXPERIMENTS.length} projects</span>
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {EXPERIMENTS.length} projects
+            </span>
           </div>
 
           <ul className="grid gap-4 sm:grid-cols-2">
@@ -97,10 +106,16 @@ export default function Home() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-muted/50 text-foreground">
                         <ExperimentIcon className="h-5 w-5" />
                       </div>
-                      <span className="font-mono text-xs text-muted-foreground">{experiment.href}</span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {experiment.href}
+                      </span>
                     </div>
-                    <h3 className="mt-4 text-base font-semibold">{experiment.title}</h3>
-                    <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">{experiment.description}</p>
+                    <h3 className="mt-4 text-base font-semibold">
+                      {experiment.title}
+                    </h3>
+                    <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {experiment.description}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-1.5">
                       {experiment.tags.map((tag) => (
                         <span
@@ -129,7 +144,9 @@ export default function Home() {
             </div>
             <div>
               <h2 className="text-sm font-semibold">Source code on GitHub</h2>
-              <p className="text-xs text-muted-foreground">github.com/eprayoga/pdf-editor-exp</p>
+              <p className="text-xs text-muted-foreground">
+                github.com/eprayoga/pdf-editor-exp
+              </p>
             </div>
           </div>
           <a
