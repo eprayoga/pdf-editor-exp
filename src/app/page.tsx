@@ -1,100 +1,162 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  FilePdf,
+  GithubLogo,
+  Layout,
+  Signature,
+  type Icon,
+} from "@phosphor-icons/react/dist/ssr";
+
+const GITHUB_URL = "https://github.com/eprayoga/pdf-editor-exp";
+
+type Experiment = {
+  href: string;
+  title: string;
+  description: string;
+  icon: Icon;
+  tags: string[];
+};
+
+const EXPERIMENTS: Experiment[] = [
+  {
+    href: "/pdf-me",
+    title: "pdfme",
+    description:
+      "Template-based PDF designer powered by pdfme. Build reusable layouts with fields, custom fonts, and a signature plugin, then generate PDFs from data.",
+    icon: Layout,
+    tags: ["pdfme", "Template Designer", "Generator"],
+  },
+  {
+    href: "/pdf-paperless",
+    title: "PDF Paperless",
+    description:
+      "Upload an existing PDF and place signatures, text, multiline text, QR codes, and images with precise PDF coordinates, then export using pdf-lib.",
+    icon: Signature,
+    tags: ["pdf-lib", "PDF.js", "Signature", "QR Code"],
+  },
+];
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+    <div className="flex min-h-dvh flex-col bg-muted/40 font-[family-name:var(--font-geist-sans)]">
+      <header className="border-b bg-background">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <FilePdf className="h-4 w-4" weight="bold" />
+            </div>
+            <span className="text-sm font-semibold">PDF Experimental</span>
+          </div>
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
+            className="inline-flex h-8 items-center gap-2 rounded-md border bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+            <GithubLogo className="h-4 w-4" />
+            <span className="hidden sm:inline">View on GitHub</span>
+            <span className="sm:hidden">GitHub</span>
           </a>
         </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6 sm:py-16">
+        <section className="max-w-2xl">
+          <span className="inline-flex items-center rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            Experiments
+          </span>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">PDF Experimental</h1>
+          <p className="mt-2 text-base text-muted-foreground">
+            by <span className="font-medium text-foreground">Endang Prayoga</span>
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            A small playground for exploring different approaches to creating and editing PDF documents in the browser.
+          </p>
+        </section>
+
+        <section aria-labelledby="experiments-heading" className="mt-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 id="experiments-heading" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Experiments
+            </h2>
+            <span className="text-xs tabular-nums text-muted-foreground">{EXPERIMENTS.length} projects</span>
+          </div>
+
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {EXPERIMENTS.map((experiment) => {
+              const ExperimentIcon = experiment.icon;
+              return (
+                <li key={experiment.href}>
+                  <Link
+                    href={experiment.href}
+                    className="group flex h-full flex-col rounded-xl border bg-background p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-muted/50 text-foreground">
+                        <ExperimentIcon className="h-5 w-5" />
+                      </div>
+                      <span className="font-mono text-xs text-muted-foreground">{experiment.href}</span>
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold">{experiment.title}</h3>
+                    <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">{experiment.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {experiment.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-md border bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-5 flex items-center gap-1.5 border-t pt-4 text-sm font-medium">
+                      Open experiment
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section className="mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border bg-background p-5 shadow-sm sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <GithubLogo className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold">Source code on GitHub</h2>
+              <p className="text-xs text-muted-foreground">github.com/eprayoga/pdf-editor-exp</p>
+            </div>
+          </div>
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Open repository
+            <ArrowUpRight className="h-4 w-4" />
+          </a>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <footer className="border-t bg-background">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:px-6">
+          <span>© {new Date().getFullYear()} Endang Prayoga</span>
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 hover:text-foreground"
+          >
+            <GithubLogo className="h-3.5 w-3.5" />
+            eprayoga/pdf-editor-exp
+          </a>
+        </div>
       </footer>
     </div>
   );
