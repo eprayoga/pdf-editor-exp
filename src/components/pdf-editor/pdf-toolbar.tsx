@@ -5,7 +5,7 @@ import {
   ArrowClockwise,
   ArrowCounterClockwise,
   CircleNotch,
-  DownloadSimple,
+  Eye,
   FilePdf,
   SidebarSimple,
   SlidersHorizontal,
@@ -70,7 +70,7 @@ export function PdfToolbar({ invalidCount, onGenerate, onReplace }: PdfToolbarPr
   const generateHint =
     invalidCount > 0
       ? `Fix ${invalidCount} invalid element${invalidCount === 1 ? "" : "s"} before generating.`
-      : "Generate and download the final PDF";
+      : "Preview the final PDF before downloading";
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4">
@@ -125,9 +125,9 @@ export function PdfToolbar({ invalidCount, onGenerate, onReplace }: PdfToolbarPr
       <Tooltip>
         <TooltipTrigger asChild>
           <span tabIndex={generateDisabled ? 0 : -1} className="inline-flex rounded-md focus-visible:outline-none">
-            <Button onClick={onGenerate} disabled={generateDisabled} aria-label="Generate PDF">
-              {isGenerating ? <CircleNotch className="h-4 w-4 animate-spin" /> : <DownloadSimple className="h-4 w-4" />}
-              <span className="hidden sm:inline">{isGenerating ? "Generating PDF..." : "Generate PDF"}</span>
+            <Button onClick={onGenerate} disabled={generateDisabled} aria-label="Preview PDF">
+              {isGenerating ? <CircleNotch className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+              <span className="hidden sm:inline">{isGenerating ? "Preparing preview..." : "Preview PDF"}</span>
             </Button>
           </span>
         </TooltipTrigger>

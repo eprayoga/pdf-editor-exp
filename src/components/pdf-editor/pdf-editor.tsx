@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,6 +16,7 @@ import { PdfCanvas } from "./pdf-canvas";
 import { PdfPropertiesPanel } from "./pdf-properties-panel";
 import { PdfSidebar } from "./pdf-sidebar";
 import { PdfToolbar } from "./pdf-toolbar";
+import { PreviewDialog, type GeneratedPreview } from "./preview-dialog";
 import { QRDialog } from "./qr/qr-dialog";
 import { SignatureDialog } from "./signature/signature-dialog";
 import { useEditorStore } from "./store";
@@ -30,6 +31,7 @@ export function PdfEditor() {
   const setComponentsSheetOpen = useEditorStore((state) => state.setComponentsSheetOpen);
   const setPropertiesSheetOpen = useEditorStore((state) => state.setPropertiesSheetOpen);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<GeneratedPreview | null>(null);
 
   useKeyboardShortcuts(status === "ready");
 
@@ -109,7 +111,7 @@ export function PdfEditor() {
     }
 
     state.setGenerating(true);
-    const toastId = toast.loading("Generating PDF...");
+    const toastId = toast.loading("Preparing preview...");
     try {
       const bytes = await generatePdf({
         pdfBytes: state.pdfBytes,
@@ -117,8 +119,8 @@ export function PdfEditor() {
         pageSizes: state.pageSizes,
       });
       const fileName = buildOutputFileName(state.pdfFile?.name ?? null);
-      downloadPdf(bytes, fileName);
-      toast.success("PDF generated", { id: toastId, description: fileName });
+      toast.dismiss(toastId);
+      setPreview({ bytes, fileName });
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate PDF.", {
@@ -128,6 +130,12 @@ export function PdfEditor() {
     } finally {
       useEditorStore.getState().setGenerating(false);
     }
+  }, []);
+
+  const handleDownload = useCallback((generated: GeneratedPreview) => {
+    downloadPdf(generated.bytes, generated.fileName);
+    toast.success("PDF downloaded", { description: generated.fileName });
+    setPreview(null);
   }, []);
 
   if (status !== "ready") {
@@ -207,6 +215,7 @@ export function PdfEditor() {
         <SignatureDialog />
         <QRDialog />
         <ImageDialog />
+        <PreviewDialog preview={preview} pageSizes={pageSizes} onClose={() => setPreview(null)} onDownload={handleDownload} />
       </div>
     </TooltipProvider>
   );
