@@ -8,6 +8,7 @@ import { CONTENT_FIELD_ID } from "../pdf-element";
 import { PositionDetails } from "../position-details";
 import {
   AlignmentToggle,
+  BackgroundField,
   BoxFields,
   ColorField,
   DeleteElementButton,
@@ -74,6 +75,14 @@ export function MultilineTextProperties({ element, errors }: Props) {
         <AlignmentToggle value={element.textAlign} onValueChange={(textAlign) => update({ textAlign }, "textAlign")} />
         <ColorField value={element.color} onValueChange={(color) => update({ color }, "color")} />
       </PropertySection>
+      <PropertySection title="Background">
+        <BackgroundField
+          color={element.backgroundColor}
+          opacity={element.backgroundOpacity}
+          onColorChange={(backgroundColor) => update({ backgroundColor }, "backgroundColor")}
+          onOpacityChange={(backgroundOpacity) => update({ backgroundOpacity }, "backgroundOpacity")}
+        />
+      </PropertySection>
       {layout && (
         <p className="text-xs text-muted-foreground tabular-nums">
           {layout.visibleLineCount} of {layout.totalLineCount} line{layout.totalLineCount === 1 ? "" : "s"} visible
@@ -83,7 +92,7 @@ export function MultilineTextProperties({ element, errors }: Props) {
         <InlineWarning>Text exceeds the selected area. Lines that do not fit are clipped in the preview and the generated PDF.</InlineWarning>
       )}
       {layout?.hasUnsupportedCharacters && (
-        <InlineWarning>Some characters are not supported by the standard PDF font and will be replaced with “?”.</InlineWarning>
+        <InlineWarning>Some characters are not supported by the selected font and will be replaced with “?”.</InlineWarning>
       )}
       <ElementErrors errors={errors} />
       <PositionDetails {...getBoundingBoxDetails(element)} />

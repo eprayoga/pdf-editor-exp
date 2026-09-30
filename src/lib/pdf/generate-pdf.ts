@@ -68,7 +68,21 @@ async function drawQr(context: DrawContext, element: QRElement) {
   });
 }
 
+function drawTextBackground(context: DrawContext, element: TextElement | MultilineTextElement) {
+  const opacity = Math.min(Math.max(element.backgroundOpacity ?? 0, 0), 1);
+  if (opacity <= 0 || !element.backgroundColor) return;
+  context.page.drawRectangle({
+    x: element.x,
+    y: element.y,
+    width: element.width,
+    height: element.height,
+    color: hexToPdfRgb(element.backgroundColor),
+    opacity,
+  });
+}
+
 function drawTextLayout(context: DrawContext, layout: TextLayout, element: TextElement | MultilineTextElement) {
+  drawTextBackground(context, element);
   const font = context.fonts.get(element.fontFamily);
   const color = hexToPdfRgb(element.color);
   for (const line of layout.lines) {
@@ -129,7 +143,7 @@ export async function generatePdf({ pdfBytes, elements, pageSizes }: GeneratePdf
 
   const fontFamilies = elements
     .filter((element): element is TextElement | MultilineTextElement => element.type === "text" || element.type === "multiline-text")
-    .map((element) => element.fontFamily as FontFamily);
+    .map((element): FontFamily => element.fontFamily);
   const fonts = await embedFonts(pdfDoc, fontFamilies);
   const images: ImageCache = new Map();
 

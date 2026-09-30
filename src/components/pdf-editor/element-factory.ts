@@ -71,6 +71,8 @@ export function createTextElement(context: PlacementContext): TextElement {
     fontFamily: "Helvetica",
     textAlign: "left",
     color: "#111827",
+    backgroundColor: "#ffffff",
+    backgroundOpacity: 0,
   };
 }
 
@@ -87,6 +89,8 @@ export function createMultilineTextElement(context: PlacementContext): Multiline
     fontFamily: "Helvetica",
     textAlign: "left",
     color: "#111827",
+    backgroundColor: "#ffffff",
+    backgroundOpacity: 0,
   };
 }
 

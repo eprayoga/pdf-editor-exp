@@ -42,6 +42,8 @@ type UiSlice = {
   propertiesSheetOpen: boolean;
   isGenerating: boolean;
   fontsReady: boolean;
+  /** Incremented whenever a lazily loaded font becomes available for measurement. */
+  fontVersion: number;
 };
 
 export type UpdateOptions = {
@@ -76,6 +78,7 @@ type Actions = {
   setPropertiesSheetOpen: (open: boolean) => void;
   setGenerating: (value: boolean) => void;
   setFontsReady: (value: boolean) => void;
+  bumpFontVersion: () => void;
 };
 
 export type EditorStore = PdfSlice & EditorSlice & UiSlice & Actions;
@@ -117,6 +120,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   propertiesSheetOpen: false,
   isGenerating: false,
   fontsReady: false,
+  fontVersion: 0,
 
   setStatus: (status) => set({ status }),
 
@@ -269,6 +273,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setPropertiesSheetOpen: (propertiesSheetOpen) => set({ propertiesSheetOpen }),
   setGenerating: (isGenerating) => set({ isGenerating }),
   setFontsReady: (fontsReady) => set({ fontsReady }),
+  bumpFontVersion: () => set((state) => ({ fontVersion: state.fontVersion + 1 })),
 }));
 
 export function getPlacementContext() {

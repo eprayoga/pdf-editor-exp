@@ -8,6 +8,7 @@ import { CONTENT_FIELD_ID } from "../pdf-element";
 import { PositionDetails } from "../position-details";
 import {
   AlignmentToggle,
+  BackgroundField,
   BoxFields,
   ColorField,
   DeleteElementButton,
@@ -64,9 +65,17 @@ export function TextProperties({ element, errors }: Props) {
         <AlignmentToggle value={element.textAlign} onValueChange={(textAlign) => update({ textAlign }, "textAlign")} />
         <ColorField value={element.color} onValueChange={(color) => update({ color }, "color")} />
       </PropertySection>
+      <PropertySection title="Background">
+        <BackgroundField
+          color={element.backgroundColor}
+          opacity={element.backgroundOpacity}
+          onColorChange={(backgroundColor) => update({ backgroundColor }, "backgroundColor")}
+          onOpacityChange={(backgroundOpacity) => update({ backgroundOpacity }, "backgroundOpacity")}
+        />
+      </PropertySection>
       {layout?.overflow && <InlineWarning>Text exceeds the selected area.</InlineWarning>}
       {layout?.hasUnsupportedCharacters && (
-        <InlineWarning>Some characters are not supported by the standard PDF font and will be replaced with “?”.</InlineWarning>
+        <InlineWarning>Some characters are not supported by the selected font and will be replaced with “?”.</InlineWarning>
       )}
       <ElementErrors errors={errors} />
       <PositionDetails {...getBoundingBoxDetails(element)} />

@@ -1,6 +1,7 @@
 export type TextAlign = "left" | "center" | "right";
 
-export type FontFamily = "Helvetica" | "Helvetica-Bold" | "Helvetica-Oblique" | "Helvetica-BoldOblique";
+/** Font face id, see FONT_OPTIONS in ./fonts (e.g. "Helvetica-Bold", "roboto:700i"). */
+export type FontFamily = string;
 
 export type PageSize = {
   width: number;
@@ -44,6 +45,10 @@ export type TextElement = BaseElement & {
   fontFamily: FontFamily;
   textAlign: TextAlign;
   color: string;
+  /** Hex fill drawn behind the text box. */
+  backgroundColor: string;
+  /** 0 = transparent, 1 = opaque. */
+  backgroundOpacity: number;
 };
 
 export type MultilineTextElement = BaseElement & {
@@ -56,6 +61,10 @@ export type MultilineTextElement = BaseElement & {
   fontFamily: FontFamily;
   textAlign: TextAlign;
   color: string;
+  /** Hex fill drawn behind the text box. */
+  backgroundColor: string;
+  /** 0 = transparent, 1 = opaque. */
+  backgroundOpacity: number;
 };
 
 export type QRElement = BaseElement & {

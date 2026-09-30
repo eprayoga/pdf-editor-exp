@@ -1,13 +1,21 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { TextAlignCenter, TextAlignLeft, TextAlignRight, Trash, WarningCircle } from "@phosphor-icons/react";
+import { TextAlignCenter, TextAlignLeft, TextAlignRight, TextB, TextItalic, Trash, WarningCircle } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { FONT_OPTIONS } from "@/lib/pdf/fonts";
+import {
+  FONT_CATEGORY_LABELS,
+  FONT_FAMILY_GROUPS,
+  getFontCssFamily,
+  getFontGroup,
+  getFontOption,
+  resolveFontVariant,
+  type FontFamilyGroup,
+} from "@/lib/pdf/fonts";
 import { isValidHexColor, normalizeHexColor } from "@/lib/pdf/color";
 import type { ElementPatch, FontFamily, TextAlign } from "@/lib/pdf/types";
 import { cn } from "@/lib/utils";
@@ -149,24 +157,69 @@ export function PropertiesHeader({ icon, title, description }: { icon: ReactNode
   );
 }
 
+const FONT_GROUPS_BY_CATEGORY = Object.entries(FONT_CATEGORY_LABELS).map(([category, label]) => ({
+  label,
+  families: FONT_FAMILY_GROUPS.filter((group) => group.category === category),
+}));
+
+function familyPreviewStyle(group: FontFamilyGroup) {
+  const regular = group.variants.find((option) => option.style === "normal") ?? group.variants[0];
+  return { fontFamily: getFontCssFamily(regular), fontWeight: regular.cssWeight, fontStyle: regular.cssStyle };
+}
+
 export function FontSelect({ value, onValueChange }: { value: FontFamily; onValueChange: (value: FontFamily) => void }) {
   const id = useId();
+  const current = getFontOption(value);
+  const group = getFontGroup(value);
+  const bold = current.weight >= 600;
+  const italic = current.style === "italic";
+  const hasVariant = (weight: number, style: "normal" | "italic") =>
+    group.variants.some((option) => (weight >= 600) === (option.weight >= 600) && option.style === style);
+  const canBold = hasVariant(bold ? 400 : 700, current.style);
+  const canItalic = hasVariant(current.weight, italic ? "normal" : "italic");
+
   return (
-    <FieldGroup label="Font" htmlFor={id}>
-      <Select value={value} onValueChange={(next) => onValueChange(next as FontFamily)}>
-        <SelectTrigger id={id}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {FONT_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              <span style={{ fontFamily: option.cssFamily, fontWeight: option.cssWeight, fontStyle: option.cssStyle }}>
-                {option.label}
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <FieldGroup label="Font" htmlFor={id} hint={`${FONT_FAMILY_GROUPS.length} font families available`}>
+      <div className="flex gap-2">
+        <Select
+          value={group.key}
+          onValueChange={(familyKey) => onValueChange(resolveFontVariant(familyKey, current.weight, current.style))}
+        >
+          <SelectTrigger id={id} className="min-w-0 flex-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="max-h-80">
+            {FONT_GROUPS_BY_CATEGORY.map((category) =>
+              category.families.length === 0 ? null : (
+                <SelectGroup key={category.label}>
+                  <SelectLabel>{category.label}</SelectLabel>
+                  {category.families.map((family) => (
+                    <SelectItem key={family.key} value={family.key}>
+                      <span style={familyPreviewStyle(family)}>{family.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )
+            )}
+          </SelectContent>
+        </Select>
+        <ToggleGroup
+          type="multiple"
+          value={[...(bold ? ["bold"] : []), ...(italic ? ["italic"] : [])]}
+          onValueChange={(next) =>
+            onValueChange(resolveFontVariant(group.key, next.includes("bold") ? 700 : 400, next.includes("italic") ? "italic" : "normal"))
+          }
+          className="flex shrink-0"
+          aria-label="Font style"
+        >
+          <ToggleGroupItem value="bold" aria-label="Bold" disabled={!canBold} className="px-2.5">
+            <TextB className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="italic" aria-label="Italic" disabled={!canItalic} className="px-2.5">
+            <TextItalic className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
     </FieldGroup>
   );
 }
@@ -201,7 +254,15 @@ export function AlignmentToggle({ value, onValueChange }: { value: TextAlign; on
   );
 }
 
-export function ColorField({ value, onValueChange }: { value: string; onValueChange: (value: string) => void }) {
+export function ColorField({
+  value,
+  onValueChange,
+  label = "Text Color",
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  label?: string;
+}) {
   const id = useId();
   const [draft, setDraft] = useState(value);
 
@@ -210,13 +271,13 @@ export function ColorField({ value, onValueChange }: { value: string; onValueCha
   }, [value]);
 
   return (
-    <FieldGroup label="Text Color" htmlFor={id}>
+    <FieldGroup label={label} htmlFor={id}>
       <div className="flex items-center gap-2">
         <label className="relative h-9 w-9 shrink-0 cursor-pointer overflow-hidden rounded-md border shadow-sm focus-within:ring-1 focus-within:ring-ring">
           <span className="absolute inset-1 rounded-[4px]" style={{ backgroundColor: normalizeHexColor(value) }} />
           <input
             type="color"
-            aria-label="Pick text color"
+            aria-label={`Pick ${label.toLowerCase()}`}
             value={normalizeHexColor(value)}
             onChange={(event) => onValueChange(event.target.value)}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -236,6 +297,52 @@ export function ColorField({ value, onValueChange }: { value: string; onValueCha
         />
       </div>
     </FieldGroup>
+  );
+}
+
+type BackgroundFieldProps = {
+  color: string;
+  opacity: number;
+  onColorChange: (value: string) => void;
+  onOpacityChange: (value: number) => void;
+};
+
+export function BackgroundField({ color, opacity, onColorChange, onOpacityChange }: BackgroundFieldProps) {
+  const sliderId = useId();
+  const percent = Math.round(Math.min(Math.max(opacity ?? 0, 0), 1) * 100);
+  const transparent = percent === 0;
+
+  return (
+    <div className="space-y-3">
+      <ColorField label="Background Color" value={color ?? "#ffffff"} onValueChange={onColorChange} />
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor={sliderId}>Opacity</Label>
+          <span className="text-[11px] tabular-nums text-muted-foreground">{transparent ? "Transparent" : `${percent}%`}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            id={sliderId}
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={percent}
+            onChange={(event) => onOpacityChange(Number(event.target.value) / 100)}
+            className="h-2 min-w-0 flex-1 cursor-pointer accent-primary"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => onOpacityChange(transparent ? 1 : 0)}
+          >
+            {transparent ? "Fill" : "Transparent"}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

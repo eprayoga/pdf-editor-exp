@@ -1,26 +1,51 @@
 "use client";
 
-import { useMemo } from "react";
-import { getFontOption, getMeasurementFonts } from "@/lib/pdf/fonts";
+import { useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import { ensureMeasurementFont, getFontCssFamily, getFontOption, getMeasurementFonts } from "@/lib/pdf/fonts";
 import { calculateMultilineTextLayout, calculateTextLayout, type TextLayout } from "@/lib/pdf/text-layout";
-import type { MultilineTextElement, TextElement } from "@/lib/pdf/types";
+import type { FontFamily, MultilineTextElement, TextElement } from "@/lib/pdf/types";
 import { normalizeHexColor } from "@/lib/pdf/color";
 import { useEditorStore } from "./store";
 
-export function useTextLayout(element: TextElement | MultilineTextElement | null): TextLayout | null {
+/** Loads a font on demand and re-renders once it is available for measurement. */
+export function useFontLoaded(family: FontFamily | null | undefined) {
   const fontsReady = useEditorStore((state) => state.fontsReady);
+  // Subscribing to fontVersion re-renders every consumer when any lazy font finishes loading.
+  useEditorStore((state) => state.fontVersion);
+  const loaded = !!family && fontsReady && getMeasurementFonts().has(family);
+
+  useEffect(() => {
+    if (!family || !fontsReady || getMeasurementFonts().has(family)) return;
+    let cancelled = false;
+    ensureMeasurementFont(family)
+      .then(() => {
+        if (!cancelled) useEditorStore.getState().bumpFontVersion();
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(`Failed to load font “${getFontOption(family).label}”.`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [family, fontsReady]);
+
+  return loaded;
+}
+
+export function useTextLayout(element: TextElement | MultilineTextElement | null): TextLayout | null {
+  const fontLoaded = useFontLoaded(element?.fontFamily);
   const lineHeight = element?.type === "multiline-text" ? element.lineHeight : 0;
 
   return useMemo(() => {
-    const fonts = getMeasurementFonts();
-    if (!element || !fontsReady || !fonts) return null;
-    const font = fonts.get(element.fontFamily);
+    if (!element || !fontLoaded) return null;
+    const font = getMeasurementFonts().get(element.fontFamily);
     if (!(element.fontSize > 0) || !(element.width > 0) || !(element.height > 0)) return null;
     return element.type === "multiline-text"
       ? calculateMultilineTextLayout(element, font)
       : calculateTextLayout(element, font);
   }, [
-    fontsReady,
+    fontLoaded,
     element?.type,
     element?.x,
     element?.y,
@@ -32,6 +57,18 @@ export function useTextLayout(element: TextElement | MultilineTextElement | null
     element?.textAlign,
     lineHeight,
   ]);
+}
+
+export function TextBackground({ element }: { element: TextElement | MultilineTextElement }) {
+  const opacity = Math.min(Math.max(element.backgroundOpacity ?? 0, 0), 1);
+  if (opacity <= 0) return null;
+  return (
+    <div
+      className="absolute inset-0"
+      style={{ backgroundColor: normalizeHexColor(element.backgroundColor ?? "#ffffff", "#ffffff"), opacity }}
+      aria-hidden="true"
+    />
+  );
 }
 
 type TextSvgProps = {
@@ -60,7 +97,7 @@ export function TextSvg({ element, layout, clip }: TextSvgProps) {
           x={line.x - element.x}
           y={top - line.baseline}
           fontSize={element.fontSize}
-          fontFamily={font.cssFamily}
+          fontFamily={getFontCssFamily(font)}
           fontWeight={font.cssWeight}
           fontStyle={font.cssStyle}
           fill={normalizeHexColor(element.color)}
