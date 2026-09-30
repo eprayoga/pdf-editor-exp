@@ -256,10 +256,10 @@ function DesignerApp() {
   ];
 
   return (
-    <>
+    <div className="flex h-dvh flex-col overflow-hidden">
       <NavBar items={navItems} />
-      <div ref={designerRef} className="flex-1 w-full" />
-    </>
+      <div ref={designerRef} className="min-h-0 w-full flex-1" />
+    </div>
   );
 }
 
